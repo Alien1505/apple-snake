@@ -5,7 +5,9 @@
       "root": "",
       "iosPath": "ios/App",
       "workspace": "ios/App/App.xcworkspace",
-      "scheme": "App"
+      "scheme": "App",
+      "target": "App",
+      "configuration": "Debug"
     }
   ]
 }
