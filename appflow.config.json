@@ -3,11 +3,7 @@
     {
       "appId": "d0c9b133",
       "root": "",
-      "iosPath": "ios/App",
-      "workspace": "ios/App/App.xcworkspace",
-      "scheme": "App",
-      "target": "App",
-      "configuration": "Debug"
+      "iosPath": "ios/App"
     }
   ]
 }
