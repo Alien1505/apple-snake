@@ -1,1 +1,8 @@
-{"configurations": {"production": {"web_dir": "www"}}}
+{
+  "apps": [
+    {
+      "appId": "d0c9b133",
+      "root": ""
+    }
+  ]
+}
