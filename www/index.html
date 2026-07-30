@@ -1,0 +1,815 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <title>Apple Snake: Literary Edition</title>
+    <style>
+        * {
+            box-sizing: border-box;
+            user-select: none;
+            -webkit-user-select: none;
+            touch-action: none;
+        }
+        body {
+            background-color: #f5f5f7;
+            color: #1d1d1f;
+            font-family: -apple-system, BlinkMacSystemFont, "SF Pro Display", "SF Pro Text", "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            height: 100vh;
+            margin: 0;
+            overflow: hidden;
+        }
+        .apple-container {
+            background-color: #ffffff;
+            padding: 16px;
+            border-radius: 28px;
+            box-shadow: 0 20px 40px rgba(0, 0, 0, 0.08), 0 1px 3px rgba(0, 0, 0, 0.05);
+            border: 1px solid rgba(0, 0, 0, 0.04);
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            width: 100%;
+            max-width: 420px;
+            height: 100%;
+            max-height: 900px;
+            justify-content: space-between;
+        }
+        .brand {
+            font-size: 14px;
+            font-weight: 600;
+            letter-spacing: -0.01em;
+            color: #86868b;
+            display: flex;
+            align-items: center;
+            gap: 6px;
+        }
+        .apple-logo {
+            width: 13px;
+            height: 13px;
+            fill: #86868b;
+        }
+        .screen-frame {
+            background-color: #fbfbfd;
+            padding: 10px;
+            border-radius: 16px;
+            border: 1px solid rgba(0, 0, 0, 0.06);
+            box-shadow: inset 0 1px 3px rgba(0,0,0,0.03);
+            width: 100%;
+            flex-grow: 1;
+            display: flex;
+            flex-direction: column;
+            justify-content: center;
+            align-items: center;
+            margin: 8px 0;
+            overflow: hidden;
+            position: relative;
+        }
+        canvas {
+            display: block;
+            background-color: #ffffff;
+            border-radius: 10px;
+            box-shadow: inset 0 2px 4px rgba(0,0,0,0.04);
+        }
+        .scoreboard {
+            display: flex;
+            justify-content: space-between;
+            width: 100%;
+            margin-top: 6px;
+            font-size: 13px;
+            font-weight: 500;
+            color: #86868b;
+            padding: 0 4px;
+        }
+        .scoreboard span {
+            color: #1d1d1f;
+            font-weight: 600;
+        }
+        .quote-box {
+            font-size: 11px;
+            color: #6e6e73;
+            text-align: center;
+            font-style: italic;
+            margin-top: 4px;
+            min-height: 28px;
+            padding: 0 10px;
+            line-height: 1.3;
+        }
+        /* Control Areas */
+        .control-container {
+            width: 100%;
+            height: 140px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            position: relative;
+        }
+        /* PS5 Joystick */
+        .ps5-control-area {
+            width: 100%;
+            height: 100%;
+            background-color: #f5f5f7;
+            border: 1px solid rgba(0,0,0,0.06);
+            border-radius: 20px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            position: relative;
+        }
+        .ps5-base {
+            width: 100px;
+            height: 100px;
+            background: radial-gradient(circle, #e5e5ea 0%, #d1d1d6 100%);
+            border-radius: 50%;
+            box-shadow: inset 0 4px 8px rgba(0,0,0,0.15), 0 2px 4px rgba(255,255,255,0.8);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            position: relative;
+        }
+        .ps5-stick {
+            width: 56px;
+            height: 56px;
+            background: linear-gradient(135deg, #2c2c2e 0%, #1c1c1e 100%);
+            border-radius: 50%;
+            box-shadow: 0 6px 12px rgba(0,0,0,0.3), inset 0 2px 3px rgba(255,255,255,0.2);
+            position: absolute;
+            cursor: pointer;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+        }
+        .ps5-stick::after {
+            content: '';
+            width: 26px;
+            height: 26px;
+            border: 2px solid rgba(255, 255, 255, 0.15);
+            border-radius: 50%;
+        }
+        /* On-Screen Arrow Buttons */
+        .arrow-control-area {
+            width: 100%;
+            height: 100%;
+            background-color: #f5f5f7;
+            border: 1px solid rgba(0,0,0,0.06);
+            border-radius: 20px;
+            display: grid;
+            grid-template-columns: repeat(3, 50px);
+            grid-template-rows: repeat(3, 40px);
+            gap: 6px;
+            justify-content: center;
+            align-content: center;
+        }
+        .arr-btn {
+            background-color: #e5e5ea;
+            border: none;
+            border-radius: 10px;
+            font-size: 16px;
+            font-weight: bold;
+            color: #1d1d1f;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            box-shadow: 0 2px 4px rgba(0,0,0,0.05);
+        }
+        .arr-btn:active {
+            background-color: #d1d1d6;
+        }
+        .arr-up { grid-column: 2; grid-row: 1; }
+        .arr-left { grid-column: 1; grid-row: 2; }
+        .arr-right { grid-column: 3; grid-row: 2; }
+        .arr-down { grid-column: 2; grid-row: 3; }
+
+        /* Overlay Menus */
+        .overlay {
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: rgba(255, 255, 255, 0.85);
+            backdrop-filter: blur(8px);
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            z-index: 10;
+            border-radius: 16px;
+            padding: 20px;
+            text-align: center;
+        }
+        .overlay h2 {
+            color: #1d1d1f;
+            font-size: 22px;
+            margin-bottom: 15px;
+            font-weight: 600;
+        }
+        .menu-btn {
+            background-color: #34c759;
+            color: white;
+            border: none;
+            padding: 10px 24px;
+            border-radius: 12px;
+            font-size: 14px;
+            font-weight: 600;
+            cursor: pointer;
+            margin: 6px;
+            width: 180px;
+            box-shadow: 0 4px 12px rgba(52, 199, 89, 0.3);
+            transition: transform 0.1s ease;
+        }
+        .menu-btn:active {
+            transform: scale(0.96);
+        }
+        .menu-btn.secondary {
+            background-color: #e5e5ea;
+            color: #1d1d1f;
+            box-shadow: 0 4px 12px rgba(0, 0, 0, 0.05);
+        }
+        .settings-group {
+            color: #86868b;
+            font-size: 13px;
+            margin-bottom: 12px;
+        }
+        .settings-group select {
+            background: #e5e5ea;
+            color: #1d1d1f;
+            border: none;
+            padding: 6px 12px;
+            border-radius: 8px;
+            font-size: 13px;
+            margin-left: 8px;
+            outline: none;
+        }
+        .hidden {
+            display: none !important;
+        }
+    </style>
+</head>
+<body>
+
+    <div class="apple-container">
+        <div class="brand">
+            <svg class="apple-logo" viewBox="0 0 170 170">
+                <path d="M150.37 130.25c-2.45 5.66-5.35 10.87-8.71 15.66-4.58 6.53-8.33 11.05-11.22 13.56-4.48 4.12-9.28 6.23-14.42 6.35-3.69 0-8.14-1.05-13.32-3.18-5.19-2.12-9.97-3.17-14.34-3.17-4.58 0-9.49 1.05-14.75 3.17-5.26 2.13-9.5 3.24-12.74 3.35-4.35.13-9.13-1.9-14.34-6.08-3.69-3.04-7.74-7.85-12.15-14.43-6.93-10.36-12.38-21.57-16.34-33.64-3.96-12.07-5.94-23.75-5.94-35.04 0-14.65 3.69-26.68 11.08-36.08 7.39-9.4 16.73-14.16 28.02-14.28 5.66 0 11.64 1.48 17.94 4.45 6.3 2.97 10.4 4.45 12.31 4.45 1.52 0 5.8-1.58 12.84-4.75 7.04-3.17 13.1-4.7 18.17-4.6 15.35.43 27.27 5.62 35.75 15.58-13.15 7.99-19.64 18.66-19.48 32.02.16 11.08 4.38 20.06 12.66 26.94 8.28 6.88 18.25 10.42 29.91 10.63-2.5 7.29-5.74 14.54-9.72 21.75zM119.22 31.97c0-7.82 2.81-15.06 8.43-21.73 5.62-6.67 12.77-10.47 21.45-11.2 0 .87-.04 1.77-.12 2.7-.08.92-.12 1.74-.12 2.45 0 7.82-2.9 15.15-8.7 21.98-5.8 6.83-13.02 10.59-21.65 11.28-.22-1.3-.39-2.73-.51-4.28-.12-1.55-.18-3.11-.18-4.5zm-3.32 99.41c-3.15 3.15-6.95 4.73-11.4 4.73-2.39 0-5.18-.62-8.38-1.85-3.2-1.23-6.24-1.85-9.12-1.85-3.04 0-6.14.62-9.3 1.85-3.15 1.23-5.88 1.88-8.18 1.95-4.46.22-8.3-1.12-11.52-4.02-3.22-2.9-5.94-6.85-8.15-11.85-4.89-11.08-7.34-22.38-7.34-33.9 0-10.75 2.5-19.56 7.5-26.43 5-6.87 11.23-10.38 18.7-10.53 4.45 0 9.25 1.25 14.4 3.75 5.15 2.5 8.78 3.75 10.9 3.75 1.74 0 5.48-1.35 11.22-4.05 5.74-2.7 11.08-3.98 16.02-3.82 10.86.43 19.34 4.38 25.44 11.85-9.33 5.64-14.02 13.59-14.08 23.85-.06 8.36 3.19 15.34 9.75 20.94 6.56 5.6 14.73 8.76 24.51 9.48-2.61 7.6-6.15 15.01-10.62 22.23-3.48 5.76-7.22 10.69-11.22 14.8z"/>
+            </svg>
+            Apple Arcade
+        </div>
+        
+        <div class="screen-frame" id="screenFrame">
+            <canvas id="gameCanvas"></canvas>
+            
+            <!-- Main Menu Overlay -->
+            <div id="mainMenu" class="overlay">
+                <h2>Apple Snake</h2>
+                <div class="settings-group">
+                    Controls: 
+                    <select id="controlSelect">
+                        <option value="joystick">PS5 Joystick</option>
+                        <option value="arrows">D-Pad Arrows</option>
+                    </select>
+                </div>
+                <button class="menu-btn" onclick="startGame()">Play Game</button>
+            </div>
+
+            <!-- Game Over Overlay -->
+            <div id="gameOverMenu" class="overlay hidden">
+                <h2>Game Over</h2>
+                <p id="finalScoreText" style="color: #86868b; font-size: 13px; margin-bottom: 15px;"></p>
+                <button class="menu-btn" onclick="startGame()">Play Again</button>
+                <button class="menu-btn secondary" onclick="returnToMenu()">Main Menu</button>
+            </div>
+        </div>
+
+        <div class="scoreboard" style="max-width: 320px;">
+            <div>Score: <span id="scoreVal">0</span></div>
+            <div>Best: <span id="highVal">0</span></div>
+        </div>
+
+        <div class="quote-box" id="quoteBox">
+            "Existing is a crime." — Franz Kafka
+        </div>
+
+        <!-- Controls Input Area -->
+        <div class="control-container">
+            <!-- PS5 Joystick Control -->
+            <div class="ps5-control-area" id="joystickArea">
+                <div class="ps5-base">
+                    <div class="ps5-stick" id="ps5Stick"></div>
+                </div>
+            </div>
+
+            <!-- Arrow Buttons Control -->
+            <div class="arrow-control-area hidden" id="arrowArea">
+                <button class="arr-btn arr-up" id="btnUp">▲</button>
+                <button class="arr-btn arr-left" id="btnLeft">◀</button>
+                <button class="arr-btn arr-right" id="btnRight">▶</button>
+                <button class="arr-btn arr-down" id="btnDown">▼</button>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        // Web Audio API Sound Synthesizer
+        let audioCtx = null;
+
+        function initAudio() {
+            if (!audioCtx) {
+                audioCtx = new (window.AudioContext || window.webkitAudioContext)();
+            }
+        }
+
+        function playSound(type) {
+            initAudio();
+            if (!audioCtx) return;
+            
+            if (audioCtx.state === 'suspended') {
+                audioCtx.resume();
+            }
+
+            const osc = audioCtx.createOscillator();
+            const gainNode = audioCtx.createGain();
+            osc.connect(gainNode);
+            gainNode.connect(audioCtx.destination);
+
+            const now = audioCtx.currentTime;
+
+            if (type === 'eat') {
+                osc.type = 'sine';
+                osc.frequency.setValueAtTime(400, now);
+                osc.frequency.exponentialRampToValueAtTime(800, now + 0.1);
+                gainNode.gain.setValueAtTime(0.3, now);
+                gainNode.gain.exponentialRampToValueAtTime(0.01, now + 0.1);
+                osc.start(now);
+                osc.stop(now + 0.1);
+            } else if (type === 'boom') {
+                osc.type = 'triangle';
+                osc.frequency.setValueAtTime(150, now);
+                osc.frequency.exponentialRampToValueAtTime(30, now + 0.3);
+                gainNode.gain.setValueAtTime(0.5, now);
+                gainNode.gain.exponentialRampToValueAtTime(0.01, now + 0.3);
+                osc.start(now);
+                osc.stop(now + 0.3);
+            }
+        }
+
+        // Philosophical Quotes Collection
+        const quotes = [
+            { text: "Existing is a crime.", author: "Franz Kafka" },
+            { text: "In the fight between you and the world, back the world.", author: "Franz Kafka" },
+            { text: "Youth is happy because it has the capacity to see beauty.", author: "Franz Kafka" },
+            { text: "A book must be the axe for the frozen sea within us.", author: "Franz Kafka" },
+            { text: "Paths are made by walking.", author: "Franz Kafka" },
+            { text: "Don't bend; don't water it down; don't try to make it logical.", author: "Franz Kafka" },
+            { text: "Pain and suffering are always inevitable for a large intelligence and a deep heart.", author: "Fyodor Dostoevsky" },
+            { text: "To go wrong in one's own way is better than to go right in someone else's.", author: "Fyodor Dostoevsky" },
+            { text: "Above all, don't lie to yourself.", author: "Fyodor Dostoevsky" },
+            { text: "The mystery of human existence lies not in just staying alive, but in finding something to live for.", author: "Fyodor Dostoevsky" },
+            { text: "He who has a why to live for can bear almost any how.", author: "Friedrich Nietzsche" },
+            { text: "Without music, life would be a mistake.", author: "Friedrich Nietzsche" },
+            { text: "That which does not kill us makes us stronger.", author: "Friedrich Nietzsche" },
+            { text: "In the depth of winter, I finally learned that within me there lay an invincible summer.", author: "Albert Camus" },
+            { text: "The only way to deal with an unfree world is to become so absolutely free that your very existence is an act of rebellion.", author: "Albert Camus" },
+            { text: "Hell is other people.", author: "Jean-Paul Sartre" },
+            { text: "Man is condemned to be free.", author: "Jean-Paul Sartre" },
+            { text: "The two enemies of human happiness are pain and boredom.", author: "Arthur Schopenhauer" }
+        ];
+
+        function getRandomQuote() {
+            const randomIndex = Math.floor(Math.random() * quotes.length);
+            const q = quotes[randomIndex];
+            return `"${q.text}" — ${q.author}`;
+        }
+
+        const canvas = document.getElementById('gameCanvas');
+        const ctx = canvas.getContext('2d');
+        const scoreVal = document.getElementById('scoreVal');
+        const highVal = document.getElementById('highVal');
+        const screenFrame = document.getElementById('screenFrame');
+        const mainMenu = document.getElementById('mainMenu');
+        const gameOverMenu = document.getElementById('gameOverMenu');
+        const finalScoreText = document.getElementById('finalScoreText');
+        const quoteBox = document.getElementById('quoteBox');
+        const controlSelect = document.getElementById('controlSelect');
+        const joystickArea = document.getElementById('joystickArea');
+        const arrowArea = document.getElementById('arrowArea');
+        const ps5Stick = document.getElementById('ps5Stick');
+
+        const gridSize = 15;
+        let tileCountX = 20;
+        let tileCountY = 20;
+
+        function resizeCanvas() {
+            const maxWidth = screenFrame.clientWidth - 20;
+            const maxHeight = screenFrame.clientHeight - 30;
+            
+            tileCountX = Math.floor(maxWidth / gridSize);
+            tileCountY = Math.floor(maxHeight / gridSize);
+            
+            canvas.width = tileCountX * gridSize;
+            canvas.height = tileCountY * gridSize;
+            
+            if (!hasStarted || isGameOver) {
+                drawWelcomeScreen();
+            }
+        }
+
+        window.addEventListener('resize', resizeCanvas);
+
+        let snake = [];
+        let food = { x: 0, y: 0 };
+        let bomb = null;
+        let bombTimer = 0;
+        let dx = 0;
+        let dy = 0;
+        let score = 0;
+        let highScore = localStorage.getItem('appleSnakeHighScore') || 0;
+        let gameInterval = null;
+        let isGameOver = false;
+        let hasStarted = false;
+        let changingDirection = false;
+        let currentControlType = 'joystick';
+
+        highVal.textContent = highScore;
+
+        controlSelect.addEventListener('change', (e) => {
+            currentControlType = e.target.value;
+            if (currentControlType === 'joystick') {
+                joystickArea.classList.remove('hidden');
+                arrowArea.classList.add('hidden');
+            } else {
+                joystickArea.classList.add('hidden');
+                arrowArea.classList.remove('hidden');
+            }
+        });
+
+        function resetGameState() {
+            const startX = Math.floor(tileCountX / 2);
+            const startY = Math.floor(tileCountY / 2);
+            snake = [
+                { x: startX, y: startY },
+                { x: startX - 1, y: startY },
+                { x: startX - 2, y: startY }
+            ];
+            score = 0;
+            scoreVal.textContent = score;
+            dx = 1;
+            dy = 0;
+            isGameOver = false;
+            changingDirection = false;
+            bomb = null;
+            bombTimer = 0;
+            generateFood();
+        }
+
+        function drawWelcomeScreen() {
+            clearCanvas();
+            drawSnake();
+            drawFood();
+        }
+
+        function startGame() {
+            initAudio();
+            mainMenu.classList.add('hidden');
+            gameOverMenu.classList.add('hidden');
+            quoteBox.textContent = getRandomQuote();
+            resizeCanvas();
+            if (gameInterval) clearInterval(gameInterval);
+            resetGameState();
+            hasStarted = true;
+            gameInterval = setInterval(gameLoop, 100);
+        }
+
+        function returnToMenu() {
+            if (gameInterval) clearInterval(gameInterval);
+            hasStarted = false;
+            isGameOver = false;
+            gameOverMenu.classList.add('hidden');
+            mainMenu.classList.remove('hidden');
+            drawWelcomeScreen();
+        }
+
+        function gameLoop() {
+            if (isGameOver) return;
+            changingDirection = false;
+            clearCanvas();
+            
+            if (bomb) {
+                bombTimer--;
+                if (bombTimer <= 0) {
+                    bomb = null;
+                }
+            }
+
+            drawFood();
+            drawBomb();
+            moveSnake();
+            if (checkGameOver()) {
+                endGame();
+                return;
+            }
+            drawSnake();
+        }
+
+        function clearCanvas() {
+            ctx.fillStyle = '#ffffff';
+            ctx.fillRect(0, 0, canvas.width, canvas.height);
+
+            ctx.strokeStyle = '#f2f2f7';
+            ctx.lineWidth = 0.5;
+            for (let i = 0; i <= tileCountX; i++) {
+                ctx.beginPath();
+                ctx.moveTo(i * gridSize, 0);
+                ctx.lineTo(i * gridSize, canvas.height);
+                ctx.stroke();
+            }
+            for (let j = 0; j <= tileCountY; j++) {
+                ctx.beginPath();
+                ctx.moveTo(0, j * gridSize);
+                ctx.lineTo(canvas.width, j * gridSize);
+                ctx.stroke();
+            }
+        }
+
+        function drawSnake() {
+            snake.forEach((part, index) => {
+                const x = part.x * gridSize;
+                const y = part.y * gridSize;
+
+                if (index === 0) {
+                    // Realistic Snake Head Design with Directional Orientation & Eyes/Tongue
+                    ctx.save();
+                    ctx.translate(x + gridSize / 2, y + gridSize / 2);
+
+                    // Determine rotation angle based on movement direction (dx, dy)
+                    let angle = 0;
+                    if (dx === 1) angle = 0;
+                    else if (dx === -1) angle = Math.PI;
+                    else if (dy === 1) angle = Math.PI / 2;
+                    else if (dy === -1) angle = -Math.PI / 2;
+                    ctx.rotate(angle);
+
+                    // Head Contour (rounded organic wedge shape)
+                    ctx.fillStyle = '#2eb64f';
+                    ctx.beginPath();
+                    ctx.roundRect(-gridSize/2 + 1, -gridSize/2 + 1, gridSize - 2, gridSize - 2, [6, 10, 10, 6]);
+                    ctx.fill();
+
+                    // Subtle scale texture / highlight on head
+                    ctx.fillStyle = '#34c759';
+                    ctx.beginPath();
+                    ctx.ellipse(-1, 0, 4, 5, 0, 0, Math.PI * 2);
+                    ctx.fill();
+
+                    // Realistic Reptilian Eyes (Slit pupils)
+                    ctx.fillStyle = '#ffcc00'; // Gold iris
+                    ctx.beginPath();
+                    ctx.arc(3, -4, 2, 0, Math.PI * 2);
+                    ctx.arc(3, 4, 2, 0, Math.PI * 2);
+                    ctx.fill();
+
+                    // Pupil vertical slits
+                    ctx.fillStyle = '#111111';
+                    ctx.fillRect(2.5, -5, 1, 2);
+                    ctx.fillRect(2.5, 3, 1, 2);
+
+                    // Flicking Forked Tongue (animates subtly or extends)
+                    ctx.strokeStyle = '#ff3b30';
+                    ctx.lineWidth = 1.2;
+                    ctx.beginPath();
+                    ctx.moveTo(7, 0);
+                    ctx.lineTo(11, 0);
+                    // Fork split
+                    ctx.moveTo(11, 0);
+                    ctx.lineTo(13, -2);
+                    ctx.moveTo(11, 0);
+                    ctx.lineTo(13, 2);
+                    ctx.stroke();
+
+                    ctx.restore();
+                } else {
+                    // Body segments
+                    ctx.fillStyle = '#30b04c';
+                    ctx.beginPath();
+                    ctx.roundRect(x + 1, y + 1, gridSize - 2, gridSize - 2, 4);
+                    ctx.fill();
+                }
+            });
+        }
+
+        function moveSnake() {
+            const head = { x: snake[0].x + dx, y: snake[0].y + dy };
+
+            if (head.x < 0) head.x = tileCountX - 1;
+            if (head.x >= tileCountX) head.x = 0;
+            if (head.y < 0) head.y = tileCountY - 1;
+            if (head.y >= tileCountY) head.y = 0;
+
+            snake.unshift(head);
+
+            if (head.x === food.x && head.y === food.y) {
+                playSound('eat');
+                score += 10;
+                scoreVal.textContent = score;
+                if (score > highScore) {
+                    highScore = score;
+                    highVal.textContent = highScore;
+                    localStorage.setItem('appleSnakeHighScore', highScore);
+                }
+                generateFood();
+                quoteBox.textContent = getRandomQuote();
+
+                if (!bomb && Math.random() < 0.4) {
+                    generateBomb();
+                }
+            } else {
+                if (bomb && head.x === bomb.x && head.y === bomb.y) {
+                    playSound('boom');
+                    score -= 5;
+                    scoreVal.textContent = Math.max(0, score);
+                    
+                    if (snake.length <= 5 || score < 0) {
+                        endGame();
+                        return;
+                    } else {
+                        for (let i = 0; i < 5 && snake.length > 3; i++) {
+                            snake.pop();
+                        }
+                    }
+                    bomb = null;
+                    quoteBox.textContent = '"A sudden catastrophe alters the trajectory of fate."';
+                } else {
+                    snake.pop();
+                }
+            }
+        }
+
+        function generateFood() {
+            food.x = Math.floor(Math.random() * tileCountX);
+            food.y = Math.floor(Math.random() * tileCountY);
+
+            snake.forEach(part => {
+                if (part.x === food.x && part.y === food.y) {
+                    generateFood();
+                }
+            });
+        }
+
+        function generateBomb() {
+            bomb = {
+                x: Math.floor(Math.random() * tileCountX),
+                y: Math.floor(Math.random() * tileCountY)
+            };
+            bombTimer = 60;
+            
+            if ((bomb.x === food.x && bomb.y === food.y) || snake.some(p => p.x === bomb.x && p.y === bomb.y)) {
+                generateBomb();
+            }
+        }
+
+        function drawFood() {
+            ctx.fillStyle = '#ff3b30';
+            ctx.beginPath();
+            ctx.roundRect(food.x * gridSize + 2, food.y * gridSize + 2, gridSize - 4, gridSize - 4, 4);
+            ctx.fill();
+        }
+
+        function drawBomb() {
+            if (!bomb) return;
+            const bx = bomb.x * gridSize;
+            const by = bomb.y * gridSize;
+            const cx = bx + gridSize / 2;
+            const cy = by + gridSize / 2;
+
+            ctx.fillStyle = '#1c1c1e';
+            ctx.beginPath();
+            ctx.arc(cx, cy + 1, 6, 0, Math.PI * 2);
+            ctx.fill();
+
+            ctx.fillStyle = '#8e8e93';
+            ctx.beginPath();
+            ctx.arc(cx - 2, cy - 1, 1.5, 0, Math.PI * 2);
+            ctx.fill();
+
+            ctx.fillStyle = '#aeaeb2';
+            ctx.fillRect(cx - 1.5, by + 2, 3, 3);
+
+            ctx.strokeStyle = '#8e8e93';
+            ctx.lineWidth = 1.5;
+            ctx.beginPath();
+            ctx.moveTo(cx, by + 2);
+            ctx.quadraticCurveTo(cx + 4, by - 1, cx + 5, by - 4);
+            ctx.stroke();
+
+            ctx.fillStyle = bombTimer % 2 === 0 ? '#ffcc00' : '#ff3b30';
+            ctx.beginPath();
+            ctx.arc(cx + 5, by - 4, 2, 0, Math.PI * 2);
+            ctx.fill();
+        }
+
+        function checkGameOver() {
+            const head = snake[0];
+            for (let i = 1; i < snake.length; i++) {
+                if (head.x === snake[i].x && head.y === snake[i].y) {
+                    return true;
+                }
+            }
+            return false;
+        }
+
+        function endGame() {
+            isGameOver = true;
+            clearInterval(gameInterval);
+            finalScoreText.textContent = `Final Score: ${score}`;
+            gameOverMenu.classList.remove('hidden');
+        }
+
+        // Joystick Input Handling
+        let isDragging = false;
+        const maxRadius = 35;
+
+        function updateJoystickPosition(deltaX, deltaY) {
+            const distance = Math.hypot(deltaX, deltaY);
+            let angle = Math.atan2(deltaY, deltaX);
+            let moveX = deltaX;
+            let moveY = deltaY;
+
+            if (distance > maxRadius) {
+                moveX = Math.cos(angle) * maxRadius;
+                moveY = Math.sin(angle) * maxRadius;
+            }
+
+            ps5Stick.style.transform = `translate(${moveX}px, ${moveY}px)`;
+
+            if (!hasStarted || isGameOver || changingDirection) return;
+
+            const goingUp = dy === -1;
+            const goingDown = dy === 1;
+            const goingRight = dx === 1;
+            const goingLeft = dx === -1;
+
+            if (Math.abs(moveX) > Math.abs(moveY)) {
+                if (moveX > 0 && !goingLeft) {
+                    dx = 1; dy = 0; changingDirection = true;
+                } else if (moveX < 0 && !goingRight) {
+                    dx = -1; dy = 0; changingDirection = true;
+                }
+            } else {
+                if (moveY > 0 && !goingUp) {
+                    dx = 0; dy = 1; changingDirection = true;
+                } else if (moveY < 0 && !goingDown) {
+                    dx = 0; dy = -1; changingDirection = true;
+                }
+            }
+        }
+
+        joystickArea.addEventListener('pointerdown', (e) => {
+            isDragging = true;
+            const rect = joystickArea.getBoundingClientRect();
+            updateJoystickPosition(e.clientX - (rect.left + rect.width / 2), e.clientY - (rect.top + rect.height / 2));
+        });
+
+        window.addEventListener('pointermove', (e) => {
+            if (!isDragging) return;
+            const rect = joystickArea.getBoundingClientRect();
+            updateJoystickPosition(e.clientX - (rect.left + rect.width / 2), e.clientY - (rect.top + rect.height / 2));
+        });
+
+        window.addEventListener('pointerup', () => {
+            if (!isDragging) return;
+            isDragging = false;
+            ps5Stick.style.transform = `translate(0px, 0px)`;
+        });
+
+        // D-Pad Arrow Button Controls
+        function changeDir(newDx, newDy) {
+            if (!hasStarted || isGameOver || changingDirection) return;
+            if (newDx === -dx && newDx !== 0) return;
+            if (newDy === -dy && newDy !== 0) return;
+            dx = newDx;
+            dy = newDy;
+            changingDirection = true;
+        }
+
+        document.getElementById('btnUp').addEventListener('click', () => changeDir(0, -1));
+        document.getElementById('btnDown').addEventListener('click', () => changeDir(0, 1));
+        document.getElementById('btnLeft').addEventListener('click', () => changeDir(-1, 0));
+        document.getElementById('btnRight').addEventListener('click', () => changeDir(1, 0));
+
+        // Keyboard Support
+        document.addEventListener('keydown', (event) => {
+            if (event.keyCode === 37) changeDir(-1, 0);
+            if (event.keyCode === 38) changeDir(0, -1);
+            if (event.keyCode === 39) changeDir(1, 0);
+            if (event.keyCode === 40) changeDir(0, 1);
+        });
+
+        // Initial Setup
+        resizeCanvas();
+        drawWelcomeScreen();
+    </script>
+</body>
+</html>
