@@ -4,12 +4,8 @@
       "appId": "d0c9b133",
       "root": "",
       "iosPath": "ios/App",
-      "configurations": {
-        "production": {
-          "scheme": "App",
-          "workspace": "ios/App/App.xcworkspace"
-        }
-      }
+      "workspace": "ios/App/App.xcworkspace",
+      "scheme": "App"
     }
   ]
 }
