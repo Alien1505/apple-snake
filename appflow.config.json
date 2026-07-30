@@ -1,7 +1,1 @@
-{
-  "configurations": {
-    "production": {
-      "web_dir": "www"
-    }
-  }
-}
+{"configurations": {"production": {"web_dir": "www"}}}
