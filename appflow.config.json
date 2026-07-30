@@ -6,7 +6,8 @@
       "iosPath": "ios/App",
       "configurations": {
         "production": {
-          "scheme": "App"
+          "scheme": "App",
+          "project": "ios/App/App.xcodeproj"
         }
       }
     }
