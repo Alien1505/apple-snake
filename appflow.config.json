@@ -3,7 +3,12 @@
     {
       "appId": "d0c9b133",
       "root": "",
-      "iosPath": "ios/App"
+      "iosPath": "ios/App",
+      "configurations": {
+        "production": {
+          "scheme": "App"
+        }
+      }
     }
   ]
 }
