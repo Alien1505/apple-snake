@@ -7,7 +7,7 @@
       "configurations": {
         "production": {
           "scheme": "App",
-          "project": "ios/App/App.xcodeproj"
+          "workspace": "ios/App/App.xcworkspace"
         }
       }
     }
